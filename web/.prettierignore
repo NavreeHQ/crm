@@ -1,0 +1,12 @@
+.next
+node_modules
+pnpm-lock.yaml
+public/mockServiceWorker.js
+src/lib/api/schema.d.ts
+src/components/ui
+playwright-report
+test-results
+AGENTS.md
+openapi.json
+# Vendored from the shadcn package as published; keep it byte for byte.
+src/app/shadcn-tailwind.css

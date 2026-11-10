@@ -1,0 +1,48 @@
+# The CRM: a Navree application in its own repository. The framework comes from crates.io, written the way
+# an app of yours would write it (`navree = "1"`); Cargo.lock holds the exact set. The framework's crates pin
+# each other exactly, so the whole set moves together. `scripts/use-framework.sh` points a build at a
+# framework checkout instead (see README.md).
+[workspace]
+resolver = "3"
+members = ["api", "api/crates/*"]
+
+[workspace.package]
+version = "1.0.0"
+edition = "2024"
+rust-version = "1.95"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/NavreeHQ/navree"
+homepage = "https://navree.com"
+publish = false
+
+[workspace.dependencies]
+# The framework: one exact version for every crate, as the framework pins its own crates.
+navree = "1"
+navree-browser = "1"
+
+# Libraries the CRM uses, at the versions the framework is tested with.
+chrono = { version = "0.4.45", features = ["serde"] }
+csv = "1.4.0"
+futures-util = "0.3.34"
+http = "1.5.0"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+tokio = { version = "1.54.1", features = ["full"] }
+tokio-tungstenite = "0.30.0"
+tracing = "0.1.44"
+uuid = { version = "1.29.0", features = ["serde", "v4", "v7"] }
+
+[profile.dev]
+debug = "line-tables-only"
+
+[profile.dev.package."*"]
+debug = false
+
+[profile.dev.package.argon2]
+opt-level = 3
+
+[profile.dev.package.blake2]
+opt-level = 3
+
+[profile.test]
+debug = "line-tables-only"

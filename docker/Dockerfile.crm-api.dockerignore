@@ -1,0 +1,8 @@
+# The CRM API image's build context: the workspace manifests and the API with its own crates.
+*
+!Cargo.toml
+!Cargo.lock
+!api/
+**/target/
+api/**/storage/
+api/**/.env

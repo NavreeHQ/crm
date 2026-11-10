@@ -1,0 +1,36 @@
+# Rust build output
+target/
+
+# Node / Next.js / Nuxt
+node_modules/
+.next/
+.nuxt/
+.output/
+# Written and rewritten by `next dev`
+/web/AGENTS.md
+/web/CLAUDE.md
+/nuxt/AGENTS.md
+/nuxt/CLAUDE.md
+/web/screenshots/
+/web/test-results/
+/web/playwright-report/
+/nuxt/test-results/
+/nuxt/playwright-report/
+
+# Runtime data written by the API (storage/*.db, uploads)
+/api/storage/
+*.db
+*.db-shm
+*.db-wal
+
+# Local secrets
+.env
+.env.*
+!.env.example
+.npmrc
+.netrc
+
+# Local editor and tool files
+.vscode/
+.idea/
+*.swp
