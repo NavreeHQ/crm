@@ -1,0 +1,17 @@
+# syntax=docker/dockerfile:1
+# The CRM's Next.js front end as a production build. The Navree packages come
+# from npm. The build context is the repository root.
+#
+#   docker build -f docker/Dockerfile.crm-web -t navree-crm-web:local .
+FROM node:24-bookworm-slim
+ENV NEXT_TELEMETRY_DISABLED=1 CI=1
+RUN corepack enable
+WORKDIR /repo/web
+COPY web/package.json web/pnpm-lock.yaml web/pnpm-workspace.yaml ./
+RUN --mount=type=cache,id=navree-crm-pnpm,target=/root/.local/share/pnpm/store \
+    pnpm install --frozen-lockfile
+COPY web ./
+RUN pnpm build
+ENV NODE_ENV=production PORT=3000 HOSTNAME=0.0.0.0
+EXPOSE 3000
+CMD ["pnpm", "start"]

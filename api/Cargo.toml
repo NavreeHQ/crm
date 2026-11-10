@@ -1,0 +1,46 @@
+[package]
+name = "crm-api"
+description = "Navree CRM API: the reference application built on the Navree framework."
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+
+[[bin]]
+name = "crm-api"
+path = "src/main.rs"
+
+# Application code: unsafe stays forbidden, but undocumented items are fine.
+[lints.rust]
+unsafe_code = "forbid"
+
+[features]
+default = ["sqlite"]
+## The PostgreSQL driver: `postgres://` database URLs (with TimescaleDB, the
+## activity timeline is a hypertable). Also runs tests/servers.rs there.
+postgres = ["navree/postgres"]
+## The MySQL driver: `mysql://` database URLs. Also runs tests/servers.rs
+## there.
+mysql = ["navree/mysql"]
+## The SQLite driver: `sqlite://` database URLs (the default in config/app.toml,
+## and what the tests run on).
+sqlite = ["navree/sqlite"]
+
+[dependencies]
+chrono = { workspace = true }
+crm-activities = { path = "crates/crm-activities" }
+crm-companies = { path = "crates/crm-companies" }
+crm-core = { path = "crates/crm-core" }
+crm-deals = { path = "crates/crm-deals" }
+crm-users = { path = "crates/crm-users" }
+navree = { workspace = true, features = ["mcp"] }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+crm-testkit = { path = "crates/crm-testkit" }
+# Browser journeys through crm-web (tests/browser.rs).
+navree-browser = { workspace = true }
+tokio = { workspace = true }

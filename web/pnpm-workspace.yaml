@@ -1,0 +1,8 @@
+allowBuilds:
+  sharp: false
+  msw: false
+minimumReleaseAgeExclude:
+  # Navree's own packages, used on the day they are released.
+  - '@navree/bff@1.0.0'
+  - '@navree/client@1.0.0'
+  - '@navree/next@1.0.0'

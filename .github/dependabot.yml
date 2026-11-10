@@ -1,0 +1,38 @@
+version: 2
+updates:
+  # The framework moves as one set, in a pull request of its own; Dependabot
+  # leaves them alone and updates the libraries around them.
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: "navree*"
+    groups:
+      cargo-minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /web
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: "@navree/*"
+    groups:
+      web-minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: npm
+    directory: /nuxt
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: "@navree/*"
+    groups:
+      nuxt-minor-and-patch:
+        update-types: [minor, patch]
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ["*"]

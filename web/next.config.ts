@@ -1,0 +1,34 @@
+import type { NextConfig } from "next";
+
+/**
+ * The Navree packages (`@navree/next`, `@navree/client`, `@navree/bff`) are installed from npm
+ * and compiled with the app. Next reads files below its root only, which is this app.
+ */
+const checkout = process.cwd();
+
+/**
+ * The browser never talks to the Navree API directly. The route handlers
+ * `src/app/api/[...path]/route.ts` and `src/app/broadcasting/auth/route.ts` are the
+ * backend-for-frontend (`@navree/next`, created in `src/lib/navree.ts`): they keep the
+ * JWTs in httpOnly cookies and forward requests to `NAVREE_API_URL` with
+ * `Authorization: Bearer`.
+ */
+const nextConfig: NextConfig = {
+  // The CRM is a cookie-authenticated client app: every screen loads its data in
+  // the browser through TanStack Query. Cache Components (and Activity-preserved
+  // hidden routes) buy nothing here and keep stale dialogs/duplicate DOM around,
+  // so we keep the classic App Router rendering model.
+  cacheComponents: false,
+  // Allow the dev server to be opened on 127.0.0.1 as well as localhost.
+  allowedDevOrigins: ["127.0.0.1", "localhost"],
+  turbopack: {
+    root: checkout,
+    // The Navree packages import `next/headers` and the like. They get this app's copy of Next,
+    // the one that holds the request scope.
+    resolveAlias: { next: "./node_modules/next", "next/*": "./node_modules/next/*" },
+  },
+  outputFileTracingRoot: checkout,
+  transpilePackages: ["@navree/next", "@navree/client", "@navree/bff"],
+};
+
+export default nextConfig;

@@ -1,0 +1,206 @@
+/**
+ * Friendly aliases for the API schema. Everything in the app imports types from
+ * here, never from `schema.d.ts` (generated from crm-api's OpenAPI document by
+ * `pnpm gen:api`), so a renamed schema only needs this file to be re-pointed.
+ */
+import type { components, paths as GeneratedPaths } from "./schema";
+
+type Schemas = components["schemas"];
+
+/** Navree error body: `{statusCode, message, error, code?, errors?}`. */
+export type ApiErrorBody = Schemas["HttpError"];
+/** Every list page inlines the same `meta` object. */
+export type PageMeta = Schemas["CompanyPage"]["meta"];
+export type Page<T> = { data: T[]; meta: PageMeta };
+
+/**
+ * A CASL raw rule as `GET /api/me/abilities` serves it. navree-access has no
+ * OpenAPI schema for it, so it is written out here.
+ */
+export type CaslRule = {
+  action: string | string[];
+  subject: string | string[];
+  conditions?: { [field: string]: unknown };
+  fields?: string | string[];
+  inverted?: boolean;
+  reason?: string;
+};
+
+export type OwnerRef = Schemas["OwnerRef"];
+export type CompanyRef = Schemas["CompanyRef"];
+export type ContactRef = Schemas["ContactRef"];
+
+export type Role = Schemas["Role"];
+/**
+ * `GET /api/v1/users` items. `GET /api/auth/me` and the login `user` return the
+ * same shape (crm-users adds `roles` through a user resource extension), although
+ * the framework documents them as `UserResource`, which has no `roles`.
+ */
+export type User = Schemas["User"];
+export type Me = Schemas["Me"];
+export type LoginInput = Schemas["LoginInput"];
+/** Navree's login response (tokens + user). Only the BFF ever sees it. */
+export type NavreeLoginResponse = Schemas["LoginResponse"];
+/** Navree's login answer for an account with two-factor authentication. */
+export type TwoFactorChallenge = Schemas["TwoFactorChallenge"];
+export type TwoFactorVerifyInput = Schemas["TwoFactorVerifyInput"];
+export type TokenPair = Schemas["TokenPair"];
+/**
+ * What the browser gets from the BFF's `POST /api/auth/login`: `{user}` (tokens
+ * stay in httpOnly cookies), or, for a 2FA account, `{two_factor_required, challenge}`
+ * where `challenge` is an opaque handle the BFF keeps the challenge token behind.
+ */
+export type BffLoginResponse = { user: User };
+export type BffTwoFactorRequired = { two_factor_required: true; expires_in: number };
+export type BffLoginResult = BffLoginResponse | BffTwoFactorRequired;
+/** `POST /api/auth/2fa/verify` through the BFF: the challenge token is in a cookie, so only the proof is sent. */
+export type BffTwoFactorInput = { code?: string; recovery_code?: string };
+export type UserCreateInput = Schemas["UserCreateInput"];
+export type UserUpdateInput = Schemas["UserUpdateInput"];
+
+export type CompanySize = Schemas["CompanySize"];
+/** The fields `GET /api/v1/companies` sorts by; a leading `-` sorts descending. */
+export type CompanySortField = "name" | "created_at";
+export type CompanySort = CompanySortField | `-${CompanySortField}`;
+export type Company = Schemas["Company"];
+export type CompanyDetail = Schemas["CompanyDetail"];
+export type CompanyInput = Schemas["CompanyInput"];
+export type CompanyUpdateInput = Schemas["CompanyUpdateInput"];
+
+export type ContactStatus = Schemas["ContactStatus"];
+export type Contact = Schemas["Contact"];
+export type ContactInput = Schemas["ContactInput"];
+export type ContactUpdateInput = Schemas["ContactUpdateInput"];
+
+export type DealStage = Schemas["DealStage"];
+/** The fields `GET /api/v1/deals` sorts by; a leading `-` sorts descending. */
+export type DealSortField = "created_at" | "title" | "amount_cents" | "expected_close_date";
+export type DealSort = DealSortField | `-${DealSortField}`;
+export type Deal = Schemas["Deal"];
+export type DealInput = Schemas["DealInput"];
+export type DealUpdateInput = Schemas["DealUpdateInput"];
+export type DealMoveInput = Schemas["DealMoveInput"];
+export type BoardStage = Schemas["BoardStage"];
+export type DealBoard = Schemas["DealBoard"];
+
+export type ActivityKind = Schemas["ActivityKind"];
+export type ActivitySubjectType = Schemas["ActivitySubjectType"];
+export type Activity = Schemas["Activity"];
+export type ActivityInput = Schemas["ActivityInput"];
+export type ActivityUpdateInput = Schemas["ActivityUpdateInput"];
+export type ActivityDueFilter = "overdue" | "today" | "upcoming";
+
+export type Dashboard = Schemas["Dashboard"];
+export type AppNotification = Schemas["Notification"];
+export type AuditEntry = Schemas["AuditEntry"];
+
+/** Every resource the UI authorizes against carries `__type` for CASL. */
+export type SubjectName = "Company" | "Contact" | "Deal" | "Activity" | "User";
+export type AppSubject = Company | Contact | Deal | Activity | User;
+
+// ---- Query parameters ----------------------------------------------------------
+//
+// navree-api cannot document query parameters yet, so
+// the generated `paths` say `query?: never` for every list endpoint. These are the
+// list queries, merged into `paths` below so the typed client checks them.
+//
+// Every list endpoint reads one grammar: each filter is `filter[name]=value`,
+// then `search`, `sort` (a leading `-` sorts descending), `page` and `per_page`
+// (at most 100). The typed client writes a nested `filter` object that way, so
+// `{ filter: { stage: "won" } }` is sent as `?filter[stage]=won`. A flat
+// `?stage=won` is ignored by the server.
+
+type Paging = { page?: number; per_page?: number };
+
+export type UserListQuery = { search?: string; sort?: string } & Paging;
+export type CompanyListQuery = {
+  filter?: { owner_id?: string; industry?: string };
+  search?: string;
+  sort?: CompanySort;
+} & Paging;
+export type ContactExportQuery = {
+  filter?: { company_id?: string; status?: ContactStatus; owner_id?: string };
+  search?: string;
+};
+export type ContactListQuery = ContactExportQuery & Paging;
+export type DealListQuery = {
+  filter?: { stage?: DealStage; owner_id?: string; company_id?: string };
+  search?: string;
+  sort?: DealSort;
+} & Paging;
+/** The board is not a list: `owner_id` is a plain parameter. */
+export type DealBoardQuery = { owner_id?: string };
+export type ActivityListQuery = {
+  filter?: {
+    subject_type?: ActivitySubjectType;
+    subject_id?: string;
+    kind?: ActivityKind;
+    assignee_id?: string;
+    due?: ActivityDueFilter;
+    completed?: boolean;
+  };
+} & Paging;
+export type NotificationListQuery = { filter?: { unread?: boolean; type?: string } } & Paging;
+export type AuditListQuery = {
+  filter?: {
+    actor_id?: string;
+    impersonator_id?: string;
+    subject_type?: string;
+    subject_id?: string;
+    action?: string;
+    kind?: "data" | "auth" | "access" | "security" | "custom";
+  };
+} & Paging;
+
+interface QueryParams {
+  "/api/v1/users": UserListQuery;
+  "/api/v1/companies": CompanyListQuery;
+  "/api/v1/contacts": ContactListQuery;
+  "/api/v1/contacts/export": ContactExportQuery;
+  "/api/v1/deals": DealListQuery;
+  "/api/v1/deals/board": DealBoardQuery;
+  "/api/v1/activities": ActivityListQuery;
+  "/api/notifications": NotificationListQuery;
+  "/api/audit": AuditListQuery;
+}
+
+type WithQuery<Operation, Query> = Operation extends { parameters: infer P }
+  ? Omit<Operation, "parameters"> & { parameters: Omit<P, "query"> & { query?: Query } }
+  : Operation;
+
+/** The generated paths, with the documented query parameters of the list endpoints. */
+export type paths = {
+  [P in keyof GeneratedPaths]: P extends keyof QueryParams
+    ? Omit<GeneratedPaths[P], "get"> & { get: WithQuery<GeneratedPaths[P]["get"], QueryParams[P]> }
+    : GeneratedPaths[P];
+};
+
+// ---- Constants -------------------------------------------------------------------
+
+/** Stage order and probabilities from the product spec (section 6). */
+export const DEAL_STAGES: readonly { stage: DealStage; label: string; probability: number }[] = [
+  { stage: "lead", label: "Lead", probability: 10 },
+  { stage: "qualified", label: "Qualified", probability: 25 },
+  { stage: "proposal", label: "Proposal", probability: 50 },
+  { stage: "negotiation", label: "Negotiation", probability: 75 },
+  { stage: "won", label: "Won", probability: 100 },
+  { stage: "lost", label: "Lost", probability: 0 },
+] as const;
+
+export const OPEN_STAGES: readonly DealStage[] = ["lead", "qualified", "proposal", "negotiation"];
+
+export const COMPANY_SIZES: readonly CompanySize[] = ["1-10", "11-50", "51-200", "201-1000", "1000+"];
+export const CONTACT_STATUSES: readonly ContactStatus[] = ["lead", "prospect", "customer", "churned"];
+export const ACTIVITY_KINDS: readonly ActivityKind[] = ["note", "call", "email", "meeting", "task"];
+export const ROLES: readonly Role[] = ["admin", "manager", "rep"];
+
+/** The largest deal value crm-api accepts, in minor units (OpenAPI `maximum` on `amount_cents`). */
+export const MAX_AMOUNT_CENTS = 1_000_000_000_000_000;
+
+export function stageLabel(stage: DealStage): string {
+  return DEAL_STAGES.find((s) => s.stage === stage)?.label ?? stage;
+}
+
+export function stageProbability(stage: DealStage): number {
+  return DEAL_STAGES.find((s) => s.stage === stage)?.probability ?? 0;
+}

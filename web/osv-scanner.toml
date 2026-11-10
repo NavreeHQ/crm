@@ -1,0 +1,3 @@
+# Findings in web/pnpm-lock.yaml that have no release its tools can
+# use. Reviewed 2026-11-01; each entry expires so it gets looked at again.
+# There are none at present.
