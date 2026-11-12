@@ -8,11 +8,13 @@
 # It changes these files (`git checkout -- .` puts them back):
 #   Cargo.toml                 a [patch.crates-io] block names every crate in the checkout
 #                              (the CRM asks for `navree = "1"`, so any 1.x checkout fits)
-#   web/pnpm-workspace.yaml    the @navree/* packages are linked from the checkout's
-#   nuxt/pnpm-workspace.yaml   packages/js, which is built first unless --no-build
+#   web/pnpm-workspace.yaml    the @navree/* packages come from tarballs packed from the
+#   nuxt/pnpm-workspace.yaml   checkout's packages/js (built first unless --no-build),
+#                              into the checkout's target/navree-js
 #
-# Run `pnpm install --no-frozen-lockfile` in web and nuxt afterwards. Needs bash,
-# sed and awk (Linux, macOS or WSL).
+# Run `pnpm install --no-frozen-lockfile` in web and nuxt afterwards, and run this
+# script again after changing the framework's packages. Needs bash, sed and awk
+# (Linux, macOS or WSL).
 set -euo pipefail
 
 framework="${1:?usage: scripts/use-framework.sh <path to a NavreeHQ/navree checkout> [--no-build]}"
@@ -52,17 +54,29 @@ sed -i '/^# BEGIN framework checkout$/,/^# END framework checkout$/d' Cargo.toml
   echo "# END framework checkout"
 } >> Cargo.toml
 
-# 2. JavaScript: link the packages.
+# 2. JavaScript: the packages as npm would serve them. Packed, each package's peer
+# dependencies (nuxt, vue, @casl/ability) resolve to the app's own copies, as they
+# do from the registry. Linked to the checkout, they would resolve from the
+# framework's node_modules, and TypeScript would see two copies of each.
 if [ "$build" = 1 ]; then
   pnpm --dir "$framework/packages/js" install --frozen-lockfile
   pnpm --dir "$framework/packages/js" build
 fi
+packed="$framework/target/navree-js"
+rm -rf "$packed"
+mkdir -p "$packed"
+for package in client bff next nuxt theme; do
+  if [ -d "$framework/packages/js/$package" ]; then
+    pnpm --dir "$framework/packages/js/$package" pack --pack-destination "$packed" > /dev/null
+  fi
+done
 for app in web nuxt; do
   file="$app/pnpm-workspace.yaml"
   sed -i '/# framework checkout$/d' "$file"
   lines=""
   for package in client bff next nuxt theme; do
-    [ -d "$framework/packages/js/$package" ] && lines+="  '@navree/${package}': link:${framework}/packages/js/${package} # framework checkout"$'\n'
+    tarball="$(find "$packed" -maxdepth 1 -name "navree-${package}-*.tgz" | head -1)"
+    [ -n "$tarball" ] && lines+="  '@navree/${package}': file:${tarball} # framework checkout"$'\n'
   done
   if grep -q '^overrides:' "$file"; then
     awk -v lines="$lines" '{ print } /^overrides:/ { printf "%s", lines }' "$file" > "$file.tmp" && mv "$file.tmp" "$file"

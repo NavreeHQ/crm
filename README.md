@@ -62,7 +62,7 @@ scripts/use-framework.sh ../navree
 cargo test --workspace
 ```
 
-The script adds a `[patch.crates-io]` block that names every framework crate in the checkout, and points the front ends' `pnpm` overrides at the checkout's packages. `git status` shows what it touched, and `git checkout -- .` puts it back. The `Framework main` workflow does this every night.
+The script adds a `[patch.crates-io]` block that names every framework crate in the checkout, and points the front ends' `pnpm` overrides at tarballs packed from the checkout's packages, the files npm would serve. Run it again after changing those packages. `git status` shows what it touched, and `git checkout -- .` puts it back. The `Framework main` workflow does this every night.
 
 ## License
 
