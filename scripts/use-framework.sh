@@ -25,6 +25,14 @@ cd "$(dirname "$0")/.."
   echo "$framework is not a checkout of NavreeHQ/navree" >&2
   exit 1
 }
+# Inside this folder, Cargo would take the framework's crates for members of the
+# CRM's workspace, and they cannot inherit its dependency table.
+case "$framework/" in
+  "$PWD/"*)
+    echo "$framework is inside the CRM's folder: check the framework out beside it, such as ../navree" >&2
+    exit 1
+    ;;
+esac
 
 version="$(sed -n '/^\[workspace\.package\]/,/^\[/{s/^version = "\(.*\)"/\1/p;}' "$framework/Cargo.toml" | head -1)"
 [ -n "$version" ] || { echo "no version in $framework/Cargo.toml" >&2; exit 1; }
