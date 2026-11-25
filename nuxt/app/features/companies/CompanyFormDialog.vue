@@ -40,6 +40,8 @@ const schema = z.object({
 });
 
 const FIELDS = ["name", "domain", "website", "industry", "size", "phone", "city", "country", "owner_id"] as const;
+// Built here, not in the template: the type checker reads a method call on an import in a template as a ref.
+const SIZE_OPTIONS = COMPANY_SIZES.map((size) => ({ value: size, label: size }));
 
 const ability = useAbility<AppAbility>();
 const canAssign = computed(() => ability.can("manage", "Company"));
@@ -132,7 +134,7 @@ const onSubmit = form.handleSubmit((values) => {
         name="size"
         label="Employees"
         none-label="Unknown"
-        :options="COMPANY_SIZES.map((s) => ({ value: s, label: s }))"
+        :options="SIZE_OPTIONS"
       />
       <TextField name="phone" label="Phone" type="tel" />
       <TextField name="city" label="City" />
