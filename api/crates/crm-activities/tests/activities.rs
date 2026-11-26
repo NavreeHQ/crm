@@ -351,7 +351,7 @@ async fn list_filters_by_kind_assignee_completion_and_subject() {
     )
     .await;
     let start = crm_testkit::TestCrm::start();
-    let minutes = |n: i64| start + chrono::Duration::minutes(n);
+    let minutes = |n: i64| start + navree::datetime::Span::minutes(n);
     for new in [
         NewActivity::task("Call Anu", renewal.id, rep1)
             .kind(ActivityKind::Call)
@@ -830,7 +830,7 @@ async fn five_activities(crm: &crm_testkit::TestCrm) -> (Uuid, Uuid, Uuid) {
     )
     .await;
     let start = crm_testkit::TestCrm::start();
-    let minutes = |n: i64| start + chrono::Duration::minutes(n);
+    let minutes = |n: i64| start + navree::datetime::Span::minutes(n);
     for new in [
         NewActivity::task("Call Anu", renewal.id, rep1)
             .kind(ActivityKind::Call)

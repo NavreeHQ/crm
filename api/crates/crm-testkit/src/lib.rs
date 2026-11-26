@@ -30,12 +30,12 @@
 
 use std::sync::Arc;
 
-use chrono::{DateTime, TimeZone, Utc};
 use crm_core::seed::{DEMO_ACCOUNTS, DEMO_PASSWORD, DemoAccount, ensure_demo_accounts};
 use crm_core::{CrmCoreModule, UserRole, platform};
 use navree::ModuleId;
 use navree::auth::User;
 use navree::contracts::Clock;
+use navree::datetime::Timestamp;
 use navree::prelude::*;
 use navree::queue::{Queue, WorkStats};
 use navree::testing::{
@@ -103,10 +103,8 @@ impl TestCrm {
 
     /// Where the fixed clock starts unless [`TestCrmBuilder::now`] says
     /// otherwise: Monday 2026-10-26, 10:00 UTC.
-    pub fn start() -> DateTime<Utc> {
-        Utc.with_ymd_and_hms(2026, 10, 26, 10, 0, 0)
-            .single()
-            .expect("a valid instant")
+    pub fn start() -> Timestamp {
+        Timestamp::utc(2026, 10, 26, 10, 0, 0).expect("a valid instant")
     }
 
     /// Signs in as `role`'s demo account through `POST /api/auth/login`.
@@ -212,7 +210,7 @@ pub struct TestCrmBuilder {
     app: fn(ConfigSources) -> AppBuilder,
     modules: Vec<Box<dyn Module>>,
     config: Vec<(String, Value)>,
-    now: DateTime<Utc>,
+    now: Timestamp,
 }
 
 impl Default for TestCrmBuilder {
@@ -255,7 +253,7 @@ impl TestCrmBuilder {
     }
 
     /// Starts the fixed clock at `now` instead of [`TestCrm::start`].
-    pub fn now(mut self, now: DateTime<Utc>) -> Self {
+    pub fn now(mut self, now: Timestamp) -> Self {
         self.now = now;
         self
     }

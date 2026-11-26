@@ -2,10 +2,10 @@
 //! booted on a temporary SQLite database. The models themselves are tested
 //! in `models.rs`.
 
-use chrono::Utc;
 use crm_core::{CrmCoreModule, permissions, platform};
 use navree::access::{AbilityFactory, AccessService};
 use navree::audit::AuditLog;
+use navree::datetime::Timestamp;
 use navree::db::Migrator;
 use navree::prelude::*;
 use navree::testing::{TempDirGuard, TestApp, temp_sqlite_url};
@@ -124,7 +124,7 @@ async fn platform_and_core_pass_check() {
 async fn the_platform_provides_the_system_clock() {
     let core = boot().await;
     let clock = core.app.get::<dyn navree::contracts::Clock>().await;
-    let drift = (clock.now() - Utc::now()).num_seconds().abs();
+    let drift = (clock.now() - Timestamp::now()).as_seconds().abs();
     assert!(drift < 5, "the system clock is {drift}s off");
     core.app.shutdown().await.expect("shutdown");
 }

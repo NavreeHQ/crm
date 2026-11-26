@@ -4,7 +4,6 @@
 //! where a record keeps naming them), aggregates count what the API counts,
 //! scopes search beyond ASCII, and the activity timeline is a time series.
 
-use chrono::{DateTime, Duration, NaiveDate, TimeZone, Utc};
 use crm_core::embeds::{CompanyRef, ContactRef, OwnerRef};
 use crm_core::enums::{ActivityKind, CompanySize, ContactStatus, Stage, SubjectType};
 use crm_core::factories::{ActivityFactory, ContactFactory, DealFactory};
@@ -15,6 +14,7 @@ use crm_core::models::{
 use crm_core::seed::ensure_demo_accounts;
 use crm_core::{CrmCoreModule, platform};
 use navree::access::Subject;
+use navree::datetime::{Date, Span, Timestamp};
 use navree::db::{Db, Migrator};
 use navree::orm::{Model, Record};
 use navree::prelude::*;
@@ -59,8 +59,8 @@ async fn boot() -> Core {
     }
 }
 
-fn at(day: u32, hour: u32) -> DateTime<Utc> {
-    Utc.with_ymd_and_hms(2026, 10, day, hour, 0, 0).unwrap()
+fn at(day: u8, hour: u8) -> Timestamp {
+    Timestamp::utc(2026, 10, day, hour, 0, 0).unwrap()
 }
 
 async fn company(core: &Core, owner: Uuid, name: &str) -> Record<Company> {
@@ -107,10 +107,7 @@ async fn every_model_round_trips_its_columns() {
         .set(Deal::CONTACT_ID, ada.id)
         .set(Deal::STAGE, Stage::Negotiation)
         .set(Deal::AMOUNT_CENTS, 1_250_000_i64)
-        .set(
-            Deal::EXPECTED_CLOSE_DATE,
-            NaiveDate::from_ymd_opt(2026, 12, 1),
-        )
+        .set(Deal::EXPECTED_CLOSE_DATE, Date::new(2026, 12, 1).ok())
         .create_one(&*core.db)
         .await
         .expect("deal");
@@ -499,13 +496,13 @@ async fn the_activity_timeline_is_a_time_series() {
     for hours in [3, 1, 2] {
         Activity::factory()
             .set(Activity::OWNER_ID, rep)
-            .set(Activity::CREATED_AT, at(20, 9) + Duration::hours(hours))
+            .set(Activity::CREATED_AT, at(20, 9) + Span::hours(hours))
             .state(ActivityFactory::on(SubjectType::Company, agra.id))
             .create_one(&*core.db)
             .await
             .unwrap();
     }
-    let created: Vec<DateTime<Utc>> = Activity::query()
+    let created: Vec<Timestamp> = Activity::query()
         .newest_first()
         .pluck(&*core.db, Activity::CREATED_AT)
         .await

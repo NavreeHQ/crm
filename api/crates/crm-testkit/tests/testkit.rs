@@ -3,9 +3,9 @@
 
 use std::time::Duration;
 
-use chrono::{TimeZone, Utc};
 use crm_testkit::{Role, TestCrm};
 use navree::contracts::Clock;
+use navree::datetime::{Span, Timestamp};
 use navree::mail::{Mailer, TemplateMail};
 use navree::prelude::*;
 use serde_json::{Value, json};
@@ -142,12 +142,12 @@ async fn each_role_gets_its_abilities() {
 
 #[tokio::test]
 async fn the_clock_is_fixed_and_shared_with_the_app() {
-    let start = Utc.with_ymd_and_hms(2026, 3, 2, 8, 0, 0).unwrap();
+    let start = Timestamp::utc(2026, 3, 2, 8, 0, 0).unwrap();
     let crm = TestCrm::builder().now(start).build().await;
     let clock = crm.get::<dyn Clock>().await;
     assert_eq!(clock.now(), start);
     crm.clock().advance(Duration::from_secs(3600));
-    assert_eq!(clock.now(), start + chrono::Duration::hours(1));
+    assert_eq!(clock.now(), start + Span::hours(1));
     assert_eq!(crm.clock().now(), clock.now());
 
     let default = TestCrm::builder().build().await;

@@ -1,8 +1,8 @@
 //! [`ActivitiesMcp`]: the activities part of the CRM's MCP server (`/mcp`,
 //! with `McpModule` in the app): the `log_activity` tool.
 
-use chrono::{DateTime, Utc};
 use crm_core::{Activity, ActivityKind, SubjectType};
+use navree::datetime::Timestamp;
 use navree::mcp::{McpContext, mcp_server};
 use navree::openapi::ToSchema;
 use navree::prelude::*;
@@ -33,7 +33,7 @@ pub struct LogActivity {
     /// When a task is due (RFC 3339).
     #[serde(default)]
     #[validate(skip)]
-    pub due_at: Option<DateTime<Utc>>,
+    pub due_at: Option<Timestamp>,
 }
 
 /// The activities part of the CRM's MCP server.

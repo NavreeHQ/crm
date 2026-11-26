@@ -1,10 +1,10 @@
 //! The API's company shapes.
 
-use chrono::{DateTime, Utc};
 use crm_core::models::Company;
 use crm_core::subjects::COMPANY;
 use crm_core::{CompanySize, OwnerRef};
 use navree::api::ApiResource;
+use navree::datetime::Timestamp;
 use navree::db::Page;
 use navree::openapi::ToSchema;
 use navree::orm::attributes::Resource;
@@ -56,9 +56,9 @@ pub struct CompanyResource {
     /// The owner.
     pub owner: OwnerRef,
     /// When it was created (UTC).
-    pub created_at: DateTime<Utc>,
+    pub created_at: Timestamp,
     /// When it last changed (UTC).
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: Timestamp,
 }
 
 impl CompanyResource {

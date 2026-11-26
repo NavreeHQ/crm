@@ -233,9 +233,9 @@ async fn seeder_creates_demo_accounts() {
 
     // Tasks fall in every bucket of the task list.
     let now = app.get::<dyn Clock>().await.now();
-    let today = now.date_naive();
+    let today = now.date_time_utc().date();
     let tasks = Activity::query().open_tasks().get(db).await.unwrap();
-    let due = |a: &Activity| a.due_at.expect("tasks are due").date_naive();
+    let due = |a: &Activity| a.due_at.expect("tasks are due").date_time_utc().date();
     assert!(tasks.iter().any(|t| due(t) < today), "an overdue task");
     assert!(tasks.iter().any(|t| due(t) == today), "a task due today");
     assert!(tasks.iter().any(|t| due(t) > today), "an upcoming task");

@@ -5,18 +5,18 @@
 
 #![allow(dead_code)]
 
-use chrono::{DateTime, TimeZone, Utc};
 use crm_activities::{ActivitiesModule, DashboardModule};
 use crm_core::models::{Activity, Company, Contact, Deal};
 use crm_core::{ActivityKind, Stage, SubjectType};
 use crm_testkit::TestCrm;
 use navree::contracts::Clock;
+use navree::datetime::Timestamp;
 use navree::db::Db;
 use navree::orm::Record;
 use uuid::Uuid;
 
 /// A CRM with the activities and dashboard modules, its clock at `now`.
-pub async fn crm_at(now: DateTime<Utc>) -> TestCrm {
+pub async fn crm_at(now: Timestamp) -> TestCrm {
     TestCrm::builder()
         .module(ActivitiesModule)
         .module(DashboardModule)
@@ -32,17 +32,13 @@ pub async fn crm() -> TestCrm {
 }
 
 /// `2026-10-26T10:00:00Z`-style UTC time.
-pub fn at(time: &str) -> DateTime<Utc> {
-    DateTime::parse_from_rfc3339(time)
-        .expect("an RFC 3339 time")
-        .with_timezone(&Utc)
+pub fn at(time: &str) -> Timestamp {
+    Timestamp::parse_rfc3339(time).expect("an RFC 3339 time")
 }
 
 /// Midnight UTC of a date.
-pub fn day(year: i32, month: u32, day: u32) -> DateTime<Utc> {
-    Utc.with_ymd_and_hms(year, month, day, 0, 0, 0)
-        .single()
-        .expect("a valid date")
+pub fn day(year: i32, month: u8, day: u8) -> Timestamp {
+    Timestamp::utc(year, month, day, 0, 0, 0).expect("a valid date")
 }
 
 async fn db(crm: &TestCrm) -> std::sync::Arc<Db> {
@@ -88,7 +84,7 @@ pub struct NewDeal {
     pub stage: Stage,
     pub amount_cents: i64,
     pub currency: &'static str,
-    pub closed_at: Option<DateTime<Utc>>,
+    pub closed_at: Option<Timestamp>,
 }
 
 impl NewDeal {
@@ -108,7 +104,7 @@ impl NewDeal {
         title: &'static str,
         stage: Stage,
         amount_cents: i64,
-        closed_at: DateTime<Utc>,
+        closed_at: Timestamp,
     ) -> Self {
         NewDeal {
             closed_at: Some(closed_at),
@@ -145,13 +141,13 @@ pub async fn deal(crm: &TestCrm, owner: Uuid, company: Uuid, new: NewDeal) -> Re
 pub struct NewActivity {
     pub kind: ActivityKind,
     pub subject: String,
-    pub due_at: Option<DateTime<Utc>>,
-    pub completed_at: Option<DateTime<Utc>>,
+    pub due_at: Option<Timestamp>,
+    pub completed_at: Option<Timestamp>,
     pub subject_type: SubjectType,
     pub subject_id: Uuid,
     pub owner_id: Uuid,
     pub assignee_id: Option<Uuid>,
-    pub created_at: Option<DateTime<Utc>>,
+    pub created_at: Option<Timestamp>,
 }
 
 impl NewActivity {
@@ -177,7 +173,7 @@ impl NewActivity {
     }
 
     /// Due at `due_at`.
-    pub fn due(mut self, due_at: DateTime<Utc>) -> Self {
+    pub fn due(mut self, due_at: Timestamp) -> Self {
         self.due_at = Some(due_at);
         self
     }
@@ -189,13 +185,13 @@ impl NewActivity {
     }
 
     /// Completed at `completed_at`.
-    pub fn completed(mut self, completed_at: DateTime<Utc>) -> Self {
+    pub fn completed(mut self, completed_at: Timestamp) -> Self {
         self.completed_at = Some(completed_at);
         self
     }
 
     /// Created at `created_at` (default: the clock's now).
-    pub fn created(mut self, created_at: DateTime<Utc>) -> Self {
+    pub fn created(mut self, created_at: Timestamp) -> Self {
         self.created_at = Some(created_at);
         self
     }

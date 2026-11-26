@@ -14,7 +14,6 @@
 
 use std::sync::Arc;
 
-use chrono::{DateTime, Datelike, Days, Duration, NaiveTime, Utc};
 use crm_core::factories::{ActivityFactory, CompanyFactory, ContactFactory, DealFactory};
 use crm_core::models::{Activity, Company, Contact, Deal};
 use crm_core::seed::{ensure_demo_accounts, in_uow};
@@ -22,6 +21,7 @@ use crm_core::{ActivityKind, CompanySize, ContactStatus, CrmCoreModule, Stage, S
 use navree::BoxFuture;
 use navree::auth::User;
 use navree::contracts::Clock;
+use navree::datetime::{Span, Time, Timestamp};
 use navree::db::{Db, Seeder};
 use navree::orm::factory::{Factory, Sequence};
 use navree::orm::{Executor, Model};
@@ -367,7 +367,7 @@ const KINDS: [ActivityKind; 6] = [
 /// The demo records of the demo accounts, dated relative to `now`.
 #[derive(Clone, Copy, Debug)]
 struct Demo {
-    now: DateTime<Utc>,
+    now: Timestamp,
     /// Who owns records, in turn: the manager, then each rep twice.
     sellers: [Uuid; 5],
 }
@@ -375,7 +375,7 @@ struct Demo {
 impl Demo {
     /// The demo records of `users`, the demo accounts in
     /// [`DEMO_ACCOUNTS`](crm_core::seed::DEMO_ACCOUNTS) order.
-    fn new(users: &[User], now: DateTime<Utc>) -> Self {
+    fn new(users: &[User], now: Timestamp) -> Self {
         let (manager, rep1, rep2) = (users[1].id, users[2].id, users[3].id);
         Demo {
             now,
@@ -421,7 +421,7 @@ impl Demo {
                 company.country = Some(country.to_owned());
                 company.owner_id = self.seller(i);
                 company.created_at = created;
-                company.updated_at = created + Duration::days((i % 7) as i64);
+                company.updated_at = created + Span::days((i % 7) as i64);
             }))
     }
 
@@ -454,7 +454,7 @@ impl Demo {
                     _ => self.seller(i),
                 };
                 contact.created_at = created;
-                contact.updated_at = created + Duration::days((i % 11) as i64);
+                contact.updated_at = created + Span::days((i % 11) as i64);
             },
         ))
     }
@@ -490,11 +490,12 @@ impl Demo {
                     .filter(|(_, earlier)| *earlier == stage)
                     .count() as i32;
                 deal.expected_close_date = match closed_at {
-                    Some(closed) => Some(closed.date_naive()),
+                    Some(closed) => Some(closed.date_time_utc().date()),
                     None => self
                         .now
-                        .date_naive()
-                        .checked_add_days(Days::new(7 + (i as u64 * 5) % 90)),
+                        .date_time_utc()
+                        .date()
+                        .add_days(7 + (i as i64 * 5) % 90),
                 };
                 deal.closed_at = closed_at;
                 deal.lost_reason =
@@ -507,7 +508,7 @@ impl Demo {
                     company.owner_id
                 };
                 deal.created_at = created;
-                deal.updated_at = closed_at.unwrap_or(created + Duration::days(2));
+                deal.updated_at = closed_at.unwrap_or(created + Span::days(2));
             }))
     }
 
@@ -557,13 +558,10 @@ impl Demo {
                 let today = self.start_of_today();
                 let (due_at, completed_at) = match kind {
                     ActivityKind::Task => match (i / 3) % 4 {
-                        0 => (Some(today - Duration::days(2 + (i % 3) as i64)), None),
-                        1 => (Some(today + Duration::hours(9 + (i % 8) as i64)), None),
-                        2 => (Some(today + Duration::days(1 + (i % 6) as i64)), None),
-                        _ => (
-                            Some(today - Duration::days(4)),
-                            Some(today - Duration::days(3)),
-                        ),
+                        0 => (Some(today - Span::days(2 + (i % 3) as i64)), None),
+                        1 => (Some(today + Span::hours(9 + (i % 8) as i64)), None),
+                        2 => (Some(today + Span::days(1 + (i % 6) as i64)), None),
+                        _ => (Some(today - Span::days(4)), Some(today - Span::days(3))),
                     },
                     _ => (None, None),
                 };
@@ -590,23 +588,23 @@ impl Demo {
         ))
     }
 
-    fn days_ago(&self, days: u64) -> DateTime<Utc> {
-        self.now - Duration::days(days as i64)
+    fn days_ago(&self, days: u64) -> Timestamp {
+        self.now - Span::days(days as i64)
     }
 
     /// Midnight UTC at the start of `now`'s day.
-    fn start_of_today(&self) -> DateTime<Utc> {
-        self.now.date_naive().and_time(NaiveTime::MIN).and_utc()
+    fn start_of_today(&self) -> Timestamp {
+        self.now.date_time_utc().date().at(Time::MIDNIGHT).in_utc()
     }
 
     /// Midnight UTC on the first day of `now`'s month.
-    fn start_of_month(&self) -> DateTime<Utc> {
+    fn start_of_month(&self) -> Timestamp {
         self.now
-            .date_naive()
-            .with_day(1)
-            .unwrap_or(self.now.date_naive())
-            .and_time(NaiveTime::MIN)
-            .and_utc()
+            .date_time_utc()
+            .date()
+            .first_of_month()
+            .at(Time::MIDNIGHT)
+            .in_utc()
     }
 
     /// The `n`th seller, starting over after the last.

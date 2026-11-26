@@ -526,7 +526,7 @@ async fn soft_deleted_hidden() {
     assert!(row.trashed());
     assert_eq!(
         row.deleted_at
-            .map(|at| at.to_rfc3339_opts(chrono::SecondsFormat::Secs, true)),
+            .map(|at| at.to_rfc3339_with(navree::datetime::Precision::Secs, true)),
         Some("2026-10-26T10:01:00Z".to_owned())
     );
     admin

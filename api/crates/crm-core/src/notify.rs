@@ -97,7 +97,7 @@ impl NotificationData {
 
 #[cfg(test)]
 mod tests {
-    use chrono::Utc;
+    use navree::datetime::Timestamp;
     use navree::notify::Notifiable;
     use serde_json::json;
     use uuid::Uuid;
@@ -114,8 +114,8 @@ mod tests {
             two_factor_secret: None,
             two_factor_recovery_codes: None,
             two_factor_confirmed_at: None,
-            created_at: Utc::now(),
-            updated_at: Utc::now(),
+            created_at: Timestamp::now(),
+            updated_at: Timestamp::now(),
         }
     }
 

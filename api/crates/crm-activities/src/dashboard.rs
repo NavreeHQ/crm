@@ -16,11 +16,11 @@ use std::collections::HashMap;
 
 use std::sync::Arc;
 
-use chrono::{DateTime, Datelike, Months, NaiveTime, Utc};
 use crm_core::Stage;
 use crm_core::models::{Activity, ActivityScopes, Deal, DealScopes};
 use navree::access::{Accessible, CurrentAccess, Read};
 use navree::contracts::Clock;
+use navree::datetime::{Time, Timestamp};
 use navree::openapi::ToSchema;
 use navree::orm::access::AccessibleQuery;
 use navree::orm::{Builder, Expr, OrmError, Row, TableBuilder};
@@ -226,15 +226,12 @@ async fn totals(uow: &Uow, deals: Builder<Deal>) -> Result<DealTotals, OrmError>
 }
 
 /// The first instants of `now`'s month and of the next one (UTC).
-fn month_of(now: DateTime<Utc>) -> (DateTime<Utc>, DateTime<Utc>) {
-    let first = now
-        .date_naive()
-        .with_day(1)
-        .unwrap_or_else(|| now.date_naive());
-    let start = first.and_time(NaiveTime::MIN).and_utc();
-    let end = start
-        .checked_add_months(Months::new(1))
-        .unwrap_or(DateTime::<Utc>::MAX_UTC);
+fn month_of(now: Timestamp) -> (Timestamp, Timestamp) {
+    let first = now.date_time_utc().date().first_of_month();
+    let start = first.at(Time::MIDNIGHT).in_utc();
+    let end = first
+        .add_months(1)
+        .map_or(Timestamp::MAX, |next| next.at(Time::MIDNIGHT).in_utc());
     (start, end)
 }
 
@@ -294,8 +291,6 @@ impl DashboardController {
 
 #[cfg(test)]
 mod tests {
-    use chrono::TimeZone;
-
     use super::*;
 
     #[test]
@@ -312,7 +307,7 @@ mod tests {
 
     #[test]
     fn months_run_from_the_first_to_the_first_utc() {
-        let at = |y, m, d, h| Utc.with_ymd_and_hms(y, m, d, h, 0, 0).unwrap();
+        let at = |y, m, d, h| Timestamp::utc(y, m, d, h, 0, 0).unwrap();
         assert_eq!(
             month_of(at(2026, 10, 28, 10)),
             (at(2026, 10, 1, 0), at(2026, 11, 1, 0))

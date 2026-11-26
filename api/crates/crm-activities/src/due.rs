@@ -2,8 +2,8 @@
 //! `GET /api/v1/activities`, the dashboard's task counts and the daily
 //! reminders all use the same day boundaries.
 
-use chrono::{DateTime, NaiveTime, TimeDelta, Utc};
 use crm_core::models::{Activity, ActivityScopes};
+use navree::datetime::{Span, Time, Timestamp};
 use navree::openapi::ToSchema;
 use navree::orm::Builder;
 use serde::Deserialize;
@@ -12,18 +12,18 @@ use serde::Deserialize;
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Today {
     /// Midnight UTC that started the day.
-    pub start: DateTime<Utc>,
+    pub start: Timestamp,
     /// Midnight UTC that ends it (the start of tomorrow).
-    pub end: DateTime<Utc>,
+    pub end: Timestamp,
 }
 
 impl Today {
     /// The UTC day of `now`.
-    pub fn of(now: DateTime<Utc>) -> Self {
-        let start = now.date_naive().and_time(NaiveTime::MIN).and_utc();
+    pub fn of(now: Timestamp) -> Self {
+        let start = now.date_time_utc().date().at(Time::MIDNIGHT).in_utc();
         Today {
             start,
-            end: start + TimeDelta::days(1),
+            end: start + Span::days(1),
         }
     }
 }
@@ -69,13 +69,12 @@ impl Due {
 
 #[cfg(test)]
 mod tests {
-    use chrono::TimeZone;
     use navree::orm::{Dialect, Model};
 
     use super::*;
 
-    fn at(y: i32, mo: u32, d: u32, h: u32, mi: u32, s: u32) -> DateTime<Utc> {
-        Utc.with_ymd_and_hms(y, mo, d, h, mi, s).unwrap()
+    fn at(y: i32, mo: u8, d: u8, h: u8, mi: u8, s: u8) -> Timestamp {
+        Timestamp::utc(y, mo, d, h, mi, s).unwrap()
     }
 
     #[test]

@@ -28,7 +28,6 @@ mysql = ["navree/mysql"]
 sqlite = ["navree/sqlite"]
 
 [dependencies]
-chrono = { workspace = true }
 crm-activities = { path = "crates/crm-activities" }
 crm-companies = { path = "crates/crm-companies" }
 crm-core = { path = "crates/crm-core" }

@@ -2,12 +2,12 @@
 
 use std::sync::Arc;
 
-use chrono::{DateTime, Utc};
 use crm_core::models::User;
 use navree::BoxFuture;
 use navree::access::AccessService;
 use navree::api::ApiResource;
 use navree::auth::{USER_SUBJECT, UserResourceExtension};
+use navree::datetime::Timestamp;
 use navree::openapi::{Schema, ToSchema};
 use navree::orm::Record;
 use navree::orm::attributes::Resource;
@@ -37,11 +37,11 @@ pub struct UserView {
     /// The email address.
     pub email: String,
     /// When the email address was verified, if it was.
-    pub email_verified_at: Option<DateTime<Utc>>,
+    pub email_verified_at: Option<Timestamp>,
     /// The user's role names (`admin`, `manager`, `rep`), sorted.
     pub roles: Vec<String>,
     /// When the account was created.
-    pub created_at: DateTime<Utc>,
+    pub created_at: Timestamp,
 }
 
 impl UserView {

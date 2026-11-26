@@ -7,6 +7,7 @@ mod support;
 
 use crm_core::{ActivityKind, SubjectType};
 use crm_testkit::{Role, TestCrm};
+use navree::datetime::Timestamp;
 use navree::mail::Mailer;
 use navree::schedule::{RunStatus, Scheduler, SkipReason};
 use serde_json::{Value, json};
@@ -14,7 +15,7 @@ use serde_json::{Value, json};
 use support::{NewActivity, activity, at, company};
 
 /// Monday 2026-10-26, a minute before the reminders are due.
-fn before_eight() -> chrono::DateTime<chrono::Utc> {
+fn before_eight() -> Timestamp {
     at("2026-10-26T07:59:00Z")
 }
 

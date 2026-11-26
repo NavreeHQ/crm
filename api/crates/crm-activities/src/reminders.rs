@@ -7,11 +7,11 @@
 use std::collections::BTreeMap;
 use std::sync::Arc;
 
-use chrono::{DateTime, Utc};
 use crm_core::models::{Activity, ActivityScopes, User};
 use crm_core::{NotifiableUser, NotificationData};
 use navree::config::Config;
 use navree::contracts::Clock;
+use navree::datetime::Timestamp;
 use navree::db::Db;
 use navree::kernel::CommandSpec;
 use navree::mail::TemplateMail;
@@ -58,7 +58,7 @@ pub struct DueTask {
     /// The task's subject.
     pub subject: String,
     /// When it is due.
-    pub due_at: DateTime<Utc>,
+    pub due_at: Timestamp,
 }
 
 /// "You have N tasks due today": the reminder one user gets.
@@ -177,7 +177,7 @@ impl TaskReminders {
     /// Reminds everyone of their open tasks due on `now`'s UTC day. Every
     /// user is attempted; the error names the ones whose notification
     /// failed (on some channel).
-    pub async fn send_for(&self, now: DateTime<Utc>) -> Result<RemindersSent, BoxError> {
+    pub async fn send_for(&self, now: Timestamp) -> Result<RemindersSent, BoxError> {
         let tasks = Due::Today
             .apply(Activity::query().open_tasks(), Today::of(now))
             .order_by(Activity::DUE_AT)
@@ -283,8 +283,6 @@ pub(crate) fn reminders_command() -> CommandSpec {
 
 #[cfg(test)]
 mod tests {
-    use chrono::TimeZone;
-
     use super::*;
 
     fn reminder(subjects: &[&str]) -> TasksDueToday {
@@ -294,7 +292,7 @@ mod tests {
                 .iter()
                 .map(|subject| DueTask {
                     subject: (*subject).to_owned(),
-                    due_at: Utc.with_ymd_and_hms(2026, 10, 26, 9, 0, 0).unwrap(),
+                    due_at: Timestamp::utc(2026, 10, 26, 9, 0, 0).unwrap(),
                 })
                 .collect(),
             link: "http://localhost:3000/tasks?tab=today".to_owned(),
