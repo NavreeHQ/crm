@@ -5,7 +5,7 @@
 //! # use crm_core::factories::DealFactory;
 //! # use crm_core::models::{Company, Deal};
 //! # use crm_core::Stage;
-//! # use chrono::Utc;
+//! # use navree::datetime::Timestamp;
 //! # use navree::db::Db;
 //! # use navree::orm::Model;
 //! # async fn demo(db: &Db, rep: uuid::Uuid) -> navree::orm::Result<()> {
@@ -18,7 +18,7 @@
 //!     .count(3)
 //!     .set(Deal::OWNER_ID, rep)
 //!     .set(Deal::COMPANY_ID, agra.id)
-//!     .state(DealFactory::won_at(Utc::now()))
+//!     .state(DealFactory::won_at(Timestamp::now()))
 //!     .create(db)
 //!     .await?;
 //! # let _ = (won, Stage::Won);
@@ -31,7 +31,7 @@
 //! `.set(..)` or a state. A record created without one fails its foreign
 //! key.
 
-use chrono::{DateTime, Utc};
+use navree::datetime::Timestamp;
 use navree::orm::factory::{FactoryContext, ModelFactory};
 use uuid::Uuid;
 
@@ -132,7 +132,7 @@ impl ModelFactory for DealFactory {
 
 impl DealFactory {
     /// A state: won at `at`.
-    pub fn won_at(at: DateTime<Utc>) -> impl Fn(&mut Deal) + Send + Sync + 'static {
+    pub fn won_at(at: Timestamp) -> impl Fn(&mut Deal) + Send + Sync + 'static {
         move |deal| {
             deal.stage = Stage::Won;
             deal.closed_at = Some(at);
@@ -142,7 +142,7 @@ impl DealFactory {
 
     /// A state: lost at `at`, for `reason`.
     pub fn lost_at(
-        at: DateTime<Utc>,
+        at: Timestamp,
         reason: impl Into<String>,
     ) -> impl Fn(&mut Deal) + Send + Sync + 'static {
         let reason = reason.into();
@@ -183,7 +183,7 @@ impl ActivityFactory {
     }
 
     /// A state: a task due at `at`.
-    pub fn task_due(at: DateTime<Utc>) -> impl Fn(&mut Activity) + Send + Sync + 'static {
+    pub fn task_due(at: Timestamp) -> impl Fn(&mut Activity) + Send + Sync + 'static {
         move |activity| {
             activity.kind = ActivityKind::Task;
             activity.due_at = Some(at);

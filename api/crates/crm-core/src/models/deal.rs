@@ -1,6 +1,6 @@
 //! [`Deal`]: opportunities moving through the pipeline (`deals`).
 
-use chrono::{DateTime, NaiveDate, Utc};
+use navree::datetime::{Date, Timestamp};
 use navree::orm::prelude::*;
 use serde::Serialize;
 use uuid::Uuid;
@@ -34,9 +34,9 @@ pub struct Deal {
     /// The 0-based place within the stage's column on the board.
     pub position: i32,
     /// When the deal is expected to close.
-    pub expected_close_date: Option<NaiveDate>,
+    pub expected_close_date: Option<Date>,
     /// When it was won or lost; `None` while open.
-    pub closed_at: Option<DateTime<Utc>>,
+    pub closed_at: Option<Timestamp>,
     /// Why it was lost (required when moved to `lost`).
     pub lost_reason: Option<String>,
     /// The company (required).
@@ -46,9 +46,9 @@ pub struct Deal {
     /// The user who owns the deal.
     pub owner_id: Uuid,
     /// When it was created.
-    pub created_at: DateTime<Utc>,
+    pub created_at: Timestamp,
     /// When it last changed.
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: Timestamp,
 }
 
 impl Deal {
@@ -122,11 +122,7 @@ impl Deal {
 
     /// Deals won within `[start, end)`.
     #[scope]
-    pub fn won_between(
-        query: Builder<Self>,
-        start: DateTime<Utc>,
-        end: DateTime<Utc>,
-    ) -> Builder<Self> {
+    pub fn won_between(query: Builder<Self>, start: Timestamp, end: Timestamp) -> Builder<Self> {
         query
             .where_(Deal::STAGE.eq(Stage::Won))
             .where_(Deal::CLOSED_AT.gte(start))

@@ -1,6 +1,6 @@
 //! [`Company`]: the organisations the team sells to (`companies`).
 
-use chrono::{DateTime, Utc};
+use navree::datetime::Timestamp;
 use navree::orm::prelude::*;
 use serde::Serialize;
 use uuid::Uuid;
@@ -44,11 +44,11 @@ pub struct Company {
     /// The user who owns the account.
     pub owner_id: Uuid,
     /// When it was created.
-    pub created_at: DateTime<Utc>,
+    pub created_at: Timestamp,
     /// When it last changed.
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: Timestamp,
     /// When it was deleted; `None` while it exists.
-    pub deleted_at: Option<DateTime<Utc>>,
+    pub deleted_at: Option<Timestamp>,
 }
 
 #[relations]

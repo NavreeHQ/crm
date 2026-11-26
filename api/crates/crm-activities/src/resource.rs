@@ -3,10 +3,10 @@
 //! record it is attached to, each loaded with one query per relation (and
 //! per kind of record) for a whole page.
 
-use chrono::{DateTime, Utc};
 use crm_core::models::{Activity, Company, Contact, Deal};
 use crm_core::{ActivityKind, OwnerRef, SubjectType};
 use navree::api::ApiResource;
+use navree::datetime::Timestamp;
 use navree::openapi::ToSchema;
 use navree::orm::Record;
 use navree::orm::attributes::Resource;
@@ -47,10 +47,10 @@ pub struct ActivityResource {
     pub body: Option<String>,
     /// When it is due (tasks), UTC.
     #[schema(required = true)]
-    pub due_at: Option<DateTime<Utc>>,
+    pub due_at: Option<Timestamp>,
     /// When it was completed (tasks), UTC.
     #[schema(required = true)]
-    pub completed_at: Option<DateTime<Utc>>,
+    pub completed_at: Option<Timestamp>,
     /// The kind of record it is attached to.
     pub subject_type: SubjectType,
     /// The record it is attached to.
@@ -69,7 +69,7 @@ pub struct ActivityResource {
     #[schema(required = true)]
     pub assignee: Option<OwnerRef>,
     /// When it was created.
-    pub created_at: DateTime<Utc>,
+    pub created_at: Timestamp,
 }
 
 impl ActivityResource {

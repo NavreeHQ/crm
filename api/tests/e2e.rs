@@ -4,10 +4,10 @@
 //! runs, ownership holds across modules, the dashboard reflects the deal
 //! and every change is in the audit trail.
 
-use chrono::Duration;
 use crm_testkit::{CrmClient, Role, TestCrm};
 use navree::audit::AuditLog;
 use navree::contracts::Clock;
+use navree::datetime::Span;
 use navree::mail::{Mailer, Message};
 use serde_json::{Value, json};
 
@@ -153,7 +153,7 @@ async fn a_deal_from_first_contact_to_reassignment() {
         json!({ "id": id(&contact), "full_name": "Harsh Sehgal" })
     );
 
-    let due_at = crm.clock().now() + Duration::hours(3);
+    let due_at = crm.clock().now() + Span::hours(3);
     let task = create(
         &rep1,
         "/api/v1/activities",

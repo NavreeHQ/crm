@@ -1,6 +1,6 @@
 //! [`Role`]: the CRM's view of navree-access's `roles`.
 
-use chrono::{DateTime, Utc};
+use navree::datetime::Timestamp;
 use navree::orm::prelude::*;
 use serde::Serialize;
 use uuid::Uuid;
@@ -18,5 +18,5 @@ pub struct Role {
     /// What the role is for.
     pub description: Option<String>,
     /// When the role was created.
-    pub created_at: DateTime<Utc>,
+    pub created_at: Timestamp,
 }

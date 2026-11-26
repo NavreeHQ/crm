@@ -1,9 +1,9 @@
 //! Request bodies and queries of `/api/v1/activities`, with their
 //! validation rules.
 
-use chrono::{DateTime, Utc};
 use crm_core::models::Activity;
 use crm_core::{ActivityKind, SubjectType};
+use navree::datetime::Timestamp;
 use navree::openapi::ToSchema;
 use navree::orm::list::{Field, ListResource, ListSpec, Op};
 use navree::validation::Validate;
@@ -30,7 +30,7 @@ pub struct CreateActivity {
     /// When it is due (RFC 3339; stored in UTC).
     #[serde(default)]
     #[validate(skip)]
-    pub due_at: Option<DateTime<Utc>>,
+    pub due_at: Option<Timestamp>,
     /// The kind of record it is attached to.
     #[validate(skip)]
     pub subject_type: SubjectType,
@@ -67,8 +67,8 @@ pub struct UpdateActivity {
     /// When it is due; `null` clears it.
     #[serde(default, deserialize_with = "nullable")]
     #[validate(skip)]
-    #[schema(value_type = Option<DateTime<Utc>>)]
-    pub due_at: Option<Option<DateTime<Utc>>>,
+    #[schema(value_type = Option<Timestamp>)]
+    pub due_at: Option<Option<Timestamp>>,
     /// The kind of record it is attached to.
     #[serde(default, deserialize_with = "present")]
     #[schema(nullable = false)]

@@ -1,8 +1,8 @@
 //! What a stage change does to a deal's closing columns: won and lost set `closed_at`, lost needs a `lost_reason`, and
 //! moving back to an open stage reopens the deal.
 
-use chrono::{DateTime, Utc};
 use crm_core::Stage;
+use navree::datetime::Timestamp;
 use navree::validation::ValidationErrors;
 
 /// The message for a lost deal without a reason.
@@ -12,7 +12,7 @@ const REASON_REQUIRED: &str = "lost_reason should not be empty";
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Closing {
     /// When it was won or lost.
-    pub(crate) closed_at: Option<DateTime<Utc>>,
+    pub(crate) closed_at: Option<Timestamp>,
     /// Why it was lost.
     pub(crate) lost_reason: Option<String>,
 }
@@ -39,7 +39,7 @@ pub(crate) fn close(
     from: Option<(Stage, &Closing)>,
     stage: Stage,
     lost_reason: Option<&str>,
-    now: DateTime<Utc>,
+    now: Timestamp,
 ) -> Result<Closing, ValidationErrors> {
     let stays = from.filter(|(previous, _)| *previous == stage);
     let closed_at = || stays.map_or(Some(now), |(_, closing)| closing.closed_at.or(Some(now)));
@@ -74,15 +74,13 @@ pub(crate) fn reason_required() -> ValidationErrors {
 
 #[cfg(test)]
 mod tests {
-    use chrono::TimeZone;
-
     use super::*;
 
-    fn at(hour: u32) -> DateTime<Utc> {
-        Utc.with_ymd_and_hms(2026, 10, 26, hour, 0, 0).unwrap()
+    fn at(hour: u8) -> Timestamp {
+        Timestamp::utc(2026, 10, 26, hour, 0, 0).unwrap()
     }
 
-    fn closed(hour: u32, reason: Option<&str>) -> Closing {
+    fn closed(hour: u8, reason: Option<&str>) -> Closing {
         Closing {
             closed_at: Some(at(hour)),
             lost_reason: reason.map(str::to_owned),

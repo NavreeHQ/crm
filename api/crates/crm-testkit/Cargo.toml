@@ -11,7 +11,6 @@ publish = false
 unsafe_code = "forbid"
 
 [dependencies]
-chrono = { workspace = true }
 crm-core = { path = "../crm-core" }
 http = { workspace = true }
 # The kit boots the CRM on SQLite files (the driver is opt-in).

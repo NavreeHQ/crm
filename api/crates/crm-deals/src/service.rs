@@ -2,12 +2,12 @@
 
 use std::sync::Arc;
 
-use chrono::NaiveDate;
 use crm_core::models::{Company, Contact, Deal, DealScopes, User};
 use crm_core::subjects::DEAL;
 use crm_core::{DEAL_UPDATED, DEALS_CHANNEL, Move, Stage, owner_for};
 use navree::access::{Ability, Accessible, ActionMarker, Authorized, Read, Update};
 use navree::contracts::{Broadcaster, Clock};
+use navree::datetime::Date;
 use navree::events::EventBus;
 use navree::orm::access::AccessibleQuery;
 use navree::orm::list::{ListQuery, ListQueryExt, ListResource};
@@ -398,9 +398,9 @@ impl References {
 }
 
 /// A `YYYY-MM-DD` date (already validated; an error is recorded otherwise).
-fn parse_date(date: Option<&str>, errors: &mut ValidationErrors) -> Option<NaiveDate> {
+fn parse_date(date: Option<&str>, errors: &mut ValidationErrors) -> Option<Date> {
     let date = date?;
-    match NaiveDate::parse_from_str(date, "%Y-%m-%d") {
+    match Date::parse("%Y-%m-%d", date) {
         Ok(date) => Some(date),
         Err(_) => {
             errors.add(

@@ -1,7 +1,7 @@
 //! The contacts CSV export (`GET /api/v1/contacts/export`).
 
-use chrono::SecondsFormat;
 use http::header::{CONTENT_DISPOSITION, CONTENT_TYPE};
+use navree::datetime::Precision;
 use navree::http::response::{IntoResponse, Response};
 use navree::prelude::*;
 
@@ -45,9 +45,7 @@ pub fn contacts_csv(contacts: &[ContactResource]) -> Result<Vec<u8>, csv::Error>
             contact.status.to_string(),
             text(&contact.company.as_ref().map(|company| company.name.clone())),
             csv_safe(&contact.owner.name).into_owned(),
-            contact
-                .created_at
-                .to_rfc3339_opts(SecondsFormat::AutoSi, true),
+            contact.created_at.to_rfc3339_with(Precision::Auto, true),
         ])?;
     }
     writer

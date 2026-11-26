@@ -1,6 +1,6 @@
 //! [`Contact`]: people, optionally at a company (`contacts`).
 
-use chrono::{DateTime, Utc};
+use navree::datetime::Timestamp;
 use navree::orm::Expr;
 use navree::orm::prelude::*;
 use serde::Serialize;
@@ -45,11 +45,11 @@ pub struct Contact {
     /// The user who owns the contact.
     pub owner_id: Uuid,
     /// When it was created.
-    pub created_at: DateTime<Utc>,
+    pub created_at: Timestamp,
     /// When it last changed.
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: Timestamp,
     /// When it was deleted; `None` while it exists.
-    pub deleted_at: Option<DateTime<Utc>>,
+    pub deleted_at: Option<Timestamp>,
 }
 
 impl Contact {

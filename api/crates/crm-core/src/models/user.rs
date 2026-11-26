@@ -1,6 +1,6 @@
 //! [`User`]: the CRM's view of navree-auth's `users`.
 
-use chrono::{DateTime, Utc};
+use navree::datetime::Timestamp;
 use navree::orm::prelude::*;
 use serde::Serialize;
 use uuid::Uuid;
@@ -22,11 +22,11 @@ pub struct User {
     /// The email address (lower-cased, unique).
     pub email: String,
     /// When the email address was verified, if it was.
-    pub email_verified_at: Option<DateTime<Utc>>,
+    pub email_verified_at: Option<Timestamp>,
     /// When the account was created.
-    pub created_at: DateTime<Utc>,
+    pub created_at: Timestamp,
     /// When the account last changed.
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: Timestamp,
 }
 
 #[relations]

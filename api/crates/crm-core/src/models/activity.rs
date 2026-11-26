@@ -1,7 +1,7 @@
 //! [`Activity`]: notes, calls, emails, meetings and tasks attached to a
 //! company, contact or deal (`activities`, the CRM's timeline).
 
-use chrono::{DateTime, Utc};
+use navree::datetime::Timestamp;
 use navree::orm::prelude::*;
 use serde::Serialize;
 use uuid::Uuid;
@@ -42,9 +42,9 @@ pub struct Activity {
     /// Details.
     pub body: Option<String>,
     /// When it is due (tasks).
-    pub due_at: Option<DateTime<Utc>>,
+    pub due_at: Option<Timestamp>,
     /// When it was completed (tasks).
-    pub completed_at: Option<DateTime<Utc>>,
+    pub completed_at: Option<Timestamp>,
     /// The kind of record it is attached to.
     #[model(cast = "string_enum")]
     pub subject_type: SubjectType,
@@ -55,9 +55,9 @@ pub struct Activity {
     /// The user who should do it (tasks).
     pub assignee_id: Option<Uuid>,
     /// When it was created.
-    pub created_at: DateTime<Utc>,
+    pub created_at: Timestamp,
     /// When it last changed.
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: Timestamp,
 }
 
 #[relations]

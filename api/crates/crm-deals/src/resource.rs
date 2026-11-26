@@ -1,10 +1,10 @@
 //! The API's deal shapes: [`DealResource`] and its embeds.
 
-use chrono::{DateTime, NaiveDate, Utc};
 use crm_core::models::Deal;
 use crm_core::subjects::DEAL;
 use crm_core::{CompanyRef, ContactRef, OwnerRef, Stage};
 use navree::api::ApiResource;
+use navree::datetime::{Date, Timestamp};
 use navree::openapi::ToSchema;
 use navree::orm::Record;
 use navree::orm::attributes::Resource;
@@ -41,9 +41,9 @@ pub struct DealResource {
     /// The 0-based place within the stage's column on the board.
     pub position: i32,
     /// When the deal is expected to close (`YYYY-MM-DD`).
-    pub expected_close_date: Option<NaiveDate>,
+    pub expected_close_date: Option<Date>,
     /// When it was won or lost; `null` while open.
-    pub closed_at: Option<DateTime<Utc>>,
+    pub closed_at: Option<Timestamp>,
     /// Why it was lost.
     pub lost_reason: Option<String>,
     /// The company's id.
@@ -59,9 +59,9 @@ pub struct DealResource {
     /// The owner.
     pub owner: OwnerRef,
     /// When it was created.
-    pub created_at: DateTime<Utc>,
+    pub created_at: Timestamp,
     /// When it last changed.
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: Timestamp,
 }
 
 impl DealResource {

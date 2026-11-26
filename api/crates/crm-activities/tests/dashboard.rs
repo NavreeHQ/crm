@@ -5,15 +5,15 @@
 
 mod support;
 
-use chrono::Duration;
 use crm_core::{ActivityKind, Stage, SubjectType};
 use crm_testkit::{Role, TestCrm};
+use navree::datetime::{Span, Timestamp};
 use serde_json::{Value, json};
 
 use support::{NewActivity, NewDeal, activity, at, company, crm_at, deal};
 
 /// Wednesday 2026-10-28, 10:00 UTC: this month began 2026-10-01 00:00 UTC.
-fn now() -> chrono::DateTime<chrono::Utc> {
+fn now() -> Timestamp {
     at("2026-10-28T10:00:00Z")
 }
 
@@ -104,7 +104,7 @@ async fn seeded() -> TestCrm {
         task("N3 note", manager).kind(ActivityKind::Note),
     ];
     for (minute, new) in (0..).zip(activities) {
-        activity(&crm, new.created(base + Duration::minutes(minute))).await;
+        activity(&crm, new.created(base + Span::minutes(minute))).await;
     }
     crm
 }
